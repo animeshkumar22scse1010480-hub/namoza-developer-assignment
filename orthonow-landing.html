@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book an Orthopaedic Consultation in Bengaluru | OrthoNow</title>
+<meta name="description" content="See an orthopaedic specialist this week at one of OrthoNow's Bengaluru clinics. Free first-visit assessment for knee and back pain.">
+
+<!--
+  PERFORMANCE NOTES FOR REVIEWER / NEXT DEVELOPER
+  ------------------------------------------------
+  - No external requests of any kind: no Google Fonts, no icon CDN, no images,
+    no analytics library loaded here. Everything is inline SVG + system fonts.
+    This is deliberate: every third-party request is a round trip that risks
+    LCP/CLS on mobile, and the brief's PageSpeed 90+ requirement is a hard gate.
+  - In production, the real GTM container snippet (googletagmanager.com/gtm.js)
+    would load in <head> as normal - it's omitted here only because this file
+    has no GTM container ID to point at and must run standalone without a server.
+    The dataLayer.push() below is exactly what GTM would listen for once wired up.
+  - Font stack uses system fonts only (serif for headline warmth, sans for UI,
+    mono for the stat/diagnostic readout chips) - zero network cost, zero
+    layout shift from web font swap.
+-->
+
+<style>
+  /* ---------- Design tokens ---------- */
+  :root{
+    --ink:        #12203B; /* primary text - deep clinical navy */
+    --ink-soft:   #4A5670; /* secondary text */
+    --paper:      #F1EEE7; /* page background - warm, neutral off-white */
+    --paper-raised:#FFFFFF;/* card surfaces */
+    --teal:       #1F6E64; /* signature accent - diagnostic teal, not decorative */
+    --teal-dark:  #154F48;
+    --brick:      #C33F2F; /* CTA / urgency accent */
+    --brick-dark: #A5321F;
+    --line:       #D9D3C4; /* hairlines, dividers */
+    --error:      #A5321F;
+
+    --font-serif: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+    --font-sans:  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono:  ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+
+    --radius: 4px;
+    --max-width: 1120px;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  img,svg{ display:block; max-width:100%; }
+
+  a{ color: inherit; }
+
+  .wrap{
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* ---------- Utility: diagnostic stat chip (signature motif reused across page) ---------- */
+  .chip{
+    display:inline-flex;
+    align-items:baseline;
+    gap:6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    color: var(--teal-dark);
+    background: rgba(31,110,100,0.08);
+    border: 1px solid rgba(31,110,100,0.25);
+    padding: 6px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .chip b{ font-size:14px; color: var(--teal-dark); }
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar .wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .wordmark{
+    font-family: var(--font-serif);
+    font-weight:700;
+    font-size: 20px;
+    letter-spacing: -0.01em;
+  }
+  .wordmark span{ color: var(--teal); }
+  .topbar-phone{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-decoration:none;
+  }
+  .topbar-phone svg{ width:16px; height:16px; flex-shrink:0; }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding: 44px 0 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero .wrap{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap: 36px;
+    position: relative;
+  }
+  .eyebrow{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--teal-dark);
+    margin: 0 0 14px;
+  }
+  h1{
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: clamp(30px, 6vw, 46px);
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    margin: 0 0 16px;
+    color: var(--ink);
+  }
+  .sub{
+    font-size: clamp(16px, 2.4vw, 18px);
+    color: var(--ink-soft);
+    max-width: 46ch;
+    margin: 0 0 24px;
+  }
+  .chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom: 8px;
+  }
+
+  /* Signature spine/alignment graphic - echoes the clinical subject (posture,
+     spine, joints) rather than a generic decorative shape. Reused smaller as
+     a section divider later in the page. */
+  .spine-graphic{
+    position:absolute;
+    right: -40px;
+    top: 0;
+    height: 100%;
+    width: 90px;
+    opacity: 0.9;
+    pointer-events:none;
+    display:none; /* shown at wider breakpoint below */
+  }
+
+  /* ---------- Form card ---------- */
+  .form-card{
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: 0 1px 2px rgba(18,32,59,0.06);
+  }
+  .form-card h2{
+    font-family: var(--font-serif);
+    font-size: 22px;
+    margin: 0 0 4px;
+  }
+  .form-card .form-sub{
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 0 0 18px;
+  }
+  .field{ margin-bottom: 14px; }
+  .field label{
+    display:block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+  .field input{
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 16px; /* 16px minimum prevents iOS auto-zoom on focus */
+    font-family: var(--font-sans);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .field input:focus{
+    outline: 2px solid var(--teal);
+    outline-offset: 1px;
+    border-color: var(--teal);
+  }
+  .phone-group{
+    display:flex;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow:hidden;
+    background: var(--paper);
+  }
+  .phone-group:focus-within{
+    outline: 2px solid var(--teal);
+    outline-offset: 1px;
+  }
+  .phone-prefix{
+    display:flex;
+    align-items:center;
+    padding: 0 12px;
+    font-family: var(--font-mono);
+    font-size: 15px;
+    color: var(--ink-soft);
+    background: rgba(18,32,59,0.04);
+    border-right: 1px solid var(--line);
+  }
+  .phone-group input{
+    border: none;
+    border-radius: 0;
+    background: transparent;
+  }
+  .phone-group input:focus{ outline: none; }
+
+  .form-error{
+    font-size: 13px;
+    color: var(--error);
+    margin: -6px 0 14px;
+  }
+
+  .btn-primary{
+    display:block;
+    width:100%;
+    padding: 15px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: var(--font-sans);
+    color: #fff;
+    background: var(--brick);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .btn-primary:hover{ background: var(--brick-dark); }
+  .btn-primary:focus-visible{ outline: 3px solid var(--teal); outline-offset: 2px; }
+
+  .microcopy{
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-align:center;
+    margin: 12px 0 0;
+  }
+
+  /* Thank-you state */
+  .thank-you{
+    text-align:center;
+    padding: 20px 4px 8px;
+  }
+  .thank-you .check{
+    width: 44px; height:44px;
+    margin: 0 auto 14px;
+    color: var(--teal);
+  }
+  .thank-you h2{ font-family: var(--font-serif); font-size:22px; margin:0 0 8px; }
+  .thank-you p{ font-size:14px; color:var(--ink-soft); margin:0; }
+
+  /* ---------- Pain points ---------- */
+  .section{ padding: 48px 0; }
+  .section-divider{
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 0;
+  }
+  .section-head{ max-width: 60ch; margin-bottom: 28px; }
+  .section-head .eyebrow{ margin-bottom: 10px; }
+  .section-head h2{
+    font-family: var(--font-serif);
+    font-size: clamp(22px, 4vw, 28px);
+    margin: 0;
+    line-height:1.2;
+  }
+
+  .pain-grid{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .pain-card{
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .pain-card .mark{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--teal-dark);
+    display:block;
+    margin-bottom: 10px;
+  }
+  .pain-card p{ margin:0; font-size:15px; color: var(--ink); }
+
+  /* ---------- Trust / credentials ---------- */
+  .trust-grid{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .trust-stats{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .doctor-card{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    background: var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .doctor-avatar{
+    width:44px; height:44px;
+    border-radius:50%;
+    background: var(--teal);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: var(--font-serif);
+    font-weight:700;
+    flex-shrink:0;
+  }
+  .doctor-card h3{ margin:0 0 2px; font-size:15px; }
+  .doctor-card p{ margin:0; font-size:13px; color:var(--ink-soft); }
+
+  .rating-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top: 18px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .rating-row svg{ width:14px; height:14px; color: var(--brick); }
+  .stars{ display:flex; gap:2px; }
+
+  /* ---------- Closing CTA ---------- */
+  .cta-band{
+    background: var(--ink);
+    color: var(--paper);
+    padding: 40px 0;
+    text-align:center;
+  }
+  .cta-band h2{
+    font-family: var(--font-serif);
+    font-size: clamp(20px,4vw,26px);
+    margin: 0 0 8px;
+  }
+  .cta-band p{
+    color: rgba(241,238,231,0.75);
+    margin: 0 0 20px;
+    font-size: 14px;
+  }
+  .cta-band .btn-primary{ max-width: 320px; margin: 0 auto; }
+
+  /* ---------- Footer ---------- */
+  footer{
+    padding: 24px 0 40px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-align:center;
+  }
+  footer a{ text-decoration: underline; }
+
+  /* ---------- Desktop layout ---------- */
+  @media (min-width: 860px){
+    .hero .wrap{
+      grid-template-columns: 1.1fr 0.9fr;
+      align-items:start;
+      gap: 48px;
+    }
+    .spine-graphic{ display:block; }
+    .pain-grid{ grid-template-columns: repeat(3,1fr); }
+    .trust-grid{ grid-template-columns: 1.1fr 0.9fr; align-items:start; }
+    .doctor-list{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+  }
+
+  /* Respect reduced-motion preference */
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    .btn-primary{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <span class="wordmark">Ortho<span>Now</span></span>
+    <a class="topbar-phone" href="tel:+918041234567">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z"/></svg>
+      080 4123 4567
+    </a>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div class="wrap">
+
+      <!-- Signature graphic: a spine/alignment line with joint markers.
+           Purely decorative but content-relevant (orthopaedic = joints,
+           posture, alignment) - not a stock icon. -->
+      <svg class="spine-graphic" viewBox="0 0 90 520" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M45 10 C 60 60, 30 100, 45 150 S 60 240, 45 290 S 30 380, 45 430 S 60 480, 45 510"
+              stroke="#1F6E64" stroke-width="1.5" stroke-dasharray="2 6" stroke-linecap="round"/>
+        <circle cx="45" cy="40" r="5" fill="#1F6E64" opacity="0.85"/>
+        <circle cx="45" cy="150" r="6" fill="#1F6E64" opacity="0.85"/>
+        <circle cx="45" cy="290" r="6" fill="#1F6E64" opacity="0.85"/>
+        <circle cx="45" cy="430" r="6" fill="#1F6E64" opacity="0.85"/>
+        <circle cx="45" cy="500" r="5" fill="#1F6E64" opacity="0.85"/>
+      </svg>
+
+      <div class="hero-copy">
+        <p class="eyebrow">OrthoNow — Bengaluru</p>
+        <h1>That knee or back pain isn't going away on its own.</h1>
+        <p class="sub">See an orthopaedic specialist this week — real diagnosis, a clear treatment plan, and a clinic near your office or home. No referral needed.</p>
+        <div class="chip-row">
+          <span class="chip"><b>9</b> clinics</span>
+          <span class="chip"><b>40+</b> specialists</span>
+          <span class="chip"><b>15,000+</b> consults</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="form-card" id="form-card">
+          <h2>Book your consultation</h2>
+          <p class="form-sub">A clinic coordinator calls you within 2 hours to confirm your slot.</p>
+
+          <form id="consult-form" novalidate>
+            <div class="field">
+              <label for="name">Full name</label>
+              <input type="text" id="name" name="name" autocomplete="name" placeholder="e.g. Priya Nair" required>
+            </div>
+            <div class="field">
+              <label for="phone">Mobile number</label>
+              <div class="phone-group">
+                <span class="phone-prefix">+91</span>
+                <input type="tel" id="phone" name="phone" autocomplete="tel" inputmode="numeric"
+                       maxlength="10" placeholder="98765 43210" required
+                       aria-describedby="phone-hint">
+              </div>
+            </div>
+            <p class="form-error" id="form-error" role="alert" hidden></p>
+            <button type="submit" class="btn-primary">Book my consultation</button>
+            <p class="microcopy" id="phone-hint">We'll only call to confirm your slot. No spam, ever.</p>
+          </form>
+
+          <div class="thank-you" id="thank-you" tabindex="-1" hidden>
+            <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/>
+            </svg>
+            <h2>Request received</h2>
+            <p>A OrthoNow coordinator will call you within 2 hours to confirm your appointment.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ================= PAIN POINTS ================= -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Sound familiar?</p>
+        <h2>Desk-job pain has a pattern. So does ignoring it.</h2>
+      </div>
+      <div class="pain-grid">
+        <div class="pain-card">
+          <span class="mark">01 · MORNING</span>
+          <p>Stiffness in your knees or lower back that takes longer to shake off each week.</p>
+        </div>
+        <div class="pain-card">
+          <span class="mark">02 · WORKDAY</span>
+          <p>A dull ache by hour six at your desk that you've started rearranging your chair around.</p>
+        </div>
+        <div class="pain-card">
+          <span class="mark">03 · WEEKEND</span>
+          <p>Stairs, a run, or a flight that used to be routine — now it's something you think twice about.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider">
+
+  <!-- ================= TRUST / CREDENTIALS ================= -->
+  <section class="section">
+    <div class="wrap">
+      <div class="trust-grid">
+        <div>
+          <div class="section-head" style="margin-bottom:18px;">
+            <p class="eyebrow">Who you'll see</p>
+            <h2>Orthopaedic specialists, not a general OPD queue.</h2>
+          </div>
+          <div class="doctor-list">
+            <div class="doctor-card">
+              <div class="doctor-avatar">RK</div>
+              <div>
+                <h3>Dr. Ramesh Kumar</h3>
+                <p>MS Ortho · Knee &amp; sports injury · 14 yrs</p>
+              </div>
+            </div>
+            <div class="doctor-card">
+              <div class="doctor-avatar">SM</div>
+              <div>
+                <h3>Dr. Sunita Menon</h3>
+                <p>MS Ortho · Spine &amp; back care · 11 yrs</p>
+              </div>
+            </div>
+          </div>
+          <div class="rating-row">
+            <span class="stars" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.9 6.4.6-4.8 4.3 1.4 6.2L10 14.9 4.4 18l1.4-6.2L1 7.5l6.4-.6z"/></svg>
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.9 6.4.6-4.8 4.3 1.4 6.2L10 14.9 4.4 18l1.4-6.2L1 7.5l6.4-.6z"/></svg>
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.9 6.4.6-4.8 4.3 1.4 6.2L10 14.9 4.4 18l1.4-6.2L1 7.5l6.4-.6z"/></svg>
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.9 6.4.6-4.8 4.3 1.4 6.2L10 14.9 4.4 18l1.4-6.2L1 7.5l6.4-.6z"/></svg>
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 1l2.6 5.9 6.4.6-4.8 4.3 1.4 6.2L10 14.9 4.4 18l1.4-6.2L1 7.5l6.4-.6z"/></svg>
+            </span>
+            <span><strong style="color:var(--ink)">4.7</strong> average rating from 2,300+ patients</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-head" style="margin-bottom:18px;">
+            <p class="eyebrow">Where</p>
+            <h2>9 clinics, 3 cities</h2>
+          </div>
+          <div class="trust-stats">
+            <span class="chip"><b>4</b> Bengaluru</span>
+            <span class="chip"><b>3</b> Hyderabad</span>
+            <span class="chip"><b>2</b> Chennai</span>
+          </div>
+          <p style="font-size:14px;color:var(--ink-soft);max-width:40ch;">Same-week appointments across Koramangala, Indiranagar, Whitefield and Jayanagar clinics in Bengaluru.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CLOSING CTA ================= -->
+  <section class="cta-band">
+    <div class="wrap">
+      <h2>Get an expert opinion before it gets worse.</h2>
+      <p>Takes 30 seconds. A coordinator calls within 2 hours.</p>
+      <a href="#form-card" class="btn-primary" style="text-decoration:none;display:block;box-sizing:border-box;">Book my consultation</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>OrthoNow · Bengaluru · Hyderabad · Chennai — <a href="tel:+918041234567">080 4123 4567</a></p>
+    <p>By submitting this form you agree to be contacted about your appointment.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  'use strict';
+
+  /*
+    GTM / dataLayer WIRING
+    -----------------------
+    window.dataLayer must exist before GTM's container script parses it, so
+    we initialise it defensively (safe even once the real gtm.js snippet is
+    added to <head> in production - it does the same thing).
+
+    IMPORTANT (see Task 01 schema): GTM's built-in Form Submission trigger
+    cannot reliably distinguish "validated and actually submitted" from
+    "user clicked submit on an invalid form" for a form like this. So the
+    push happens here, in application code, only after validation passes -
+    this is the dataLayer push a front-end developer is responsible for
+    writing and firing; GTM then just listens for the custom event below.
+  */
+  window.dataLayer = window.dataLayer || [];
+
+  var form      = document.getElementById('consult-form');
+  var thankYou  = document.getElementById('thank-you');
+  var errorEl   = document.getElementById('form-error');
+  var phoneInput = document.getElementById('phone');
+
+  // Indian mobile numbers: 10 digits, starting 6-9.
+  var PHONE_PATTERN = /^[6-9]\d{9}$/;
+
+  // Strip anything non-numeric as the user types, so paste-with-spaces etc.
+  // doesn't break the pattern check on submit.
+  phoneInput.addEventListener('input', function(){
+    phoneInput.value = phoneInput.value.replace(/\D/g, '').slice(0, 10);
+  });
+
+  function showError(message){
+    errorEl.textContent = message;
+    errorEl.hidden = false;
+  }
+
+  form.addEventListener('submit', function(event){
+    event.preventDefault(); // no page reload, ever - this is a JS-handled submit
+
+    var name  = form.name.value.trim();
+    var phone = phoneInput.value.trim();
+
+    if (name.length < 2) {
+      showError('Please enter your full name.');
+      form.name.focus();
+      return;
+    }
+    if (!PHONE_PATTERN.test(phone)) {
+      showError('Please enter a valid 10-digit mobile number.');
+      phoneInput.focus();
+      return;
+    }
+    errorEl.hidden = true;
+
+    // ---- GTM dataLayer push: fires on validated submit only ----
+    window.dataLayer.push({
+      event: 'consultation_form_submitted',
+      form_location: 'hero_primary',
+      lead_source: 'google_ads_consultation_lp',
+      clinic_city_interest: 'bengaluru',
+      phone_provided: true
+    });
+
+    // Swap to thank-you state without a page reload.
+    form.hidden = true;
+    thankYou.hidden = false;
+    thankYou.focus();
+
+    // In production, the actual lead submission (name + phone -> HubSpot,
+    // per Task 03) would be an async fetch() call here. It's intentionally
+    // left out of this file since Task 02 only requires the dataLayer push
+    // and the thank-you state, and this file has no backend to call.
+  });
+})();
+</script>
+
+</body>
+</html>
